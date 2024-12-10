@@ -1,4 +1,3 @@
-from dotenv import load_dotenv
 from langchain_ollama import OllamaLLM
 import os
 import logging
@@ -12,8 +11,7 @@ class ModelManager:
         :param model_name: Il nome del modello da utilizzare. Se None, verrà preso dal file .env.
         :param initial_prompt: Un prompt iniziale da usare come contesto per il modello.
         """
-        load_dotenv()
-        self.model_name = model_name or os.getenv('MODEL')
+        self.model_name = model_name
         self.model = None
         self.context = initial_prompt or "Sei un assistente virtuale molto competente. Devi rispondere in italiano"
         self._initialize_model()
@@ -69,6 +67,15 @@ class ModelManager:
                 break
             response = self.invoke_model(user_input)
             print(f"{self.model_name.capitalize()}: {response}")
+    
+    def add_context(self, new_context: str):
+        """
+        Aggiunge un contesto al contesto attuale.
+
+        :param new_context: Contesto da aggiungere.
+        """
+        self.context += f"\n{new_context}"
+        logging.info(f"Contesto aggiornato: {self.context}")
 
     def get_context(self) -> str:
         """Restituisce il contesto attuale."""

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error 401 - Unauthorized</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script>
+        // Imposta il redirect dopo un certo tempo
+        const redirectUrl = "{{ redirect_url }}";
+        const redirectDelay = 5000; // Tempo in millisecondi (es. 5 secondi)
+
+        window.onload = () => {
+            setTimeout(() => {
+                window.location.href = redirectUrl;
+            }, redirectDelay);
+        };
+    </script>
+</head>
+<body>
+    <div class="error-container">
+        <h1>401</h1>
+        <h2>Unauthorized</h2>
+        <p>Errore: <span>{{ message }}</span></p>
+        <p>Ti riporto agli <a href="{{ redirect_url }}">inizi</a> a breve</p>
+    </div>
+</body>
+</html>

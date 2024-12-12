@@ -1,2 +1,4 @@
 crAi_env/
 Lib/
+__pycache__/
+instance/users.db

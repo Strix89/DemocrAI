@@ -1,15 +1,17 @@
 import logging
 import os
 import sys
+import secrets
 from dotenv import load_dotenv
 from Lib.ModelManager import ModelManager
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask import Flask, request, jsonify, redirect, render_template, session, url_for # Import Flask to allow us to create a web server       
+from flask import Flask, request, session, jsonify, redirect, render_template, url_for # Import Flask to allow us to create a web server       
 
 load_dotenv() # Load the .env file
 logging.basicConfig(level=logging.INFO)
 app = Flask(__name__) # Create a new web server
+app.secret_key = secrets.token_urlsafe(16) # Generate a random secret key for the session  
 
 try:
     model_manager = ModelManager(os.environ.get("MODEL"))
@@ -52,15 +54,15 @@ def login():
 
     user = User.query.filter_by(username=username).first()
     if user is None or not user.check_password(password):
-        return error_401("Accesso negato | Chi sei?", url_for("index"))
-    else:
-        return "Bella ZII"
+        return render_template("errors/401.html", message = "Accesso negato | Chi sei?", redirect_url = url_for("index"))
 
     session["username"] = username
     return redirect(url_for("chatpage"))
 
-def error_401(message, redirect_url):
-    return render_template('errors/401.html', message=message, redirect_url=redirect_url)
+@app.route("/logout")
+def logout():
+    session.pop("username", None)
+    return redirect(url_for("index"))
 
 if __name__ == "__main__":
     app.run(debug=True)

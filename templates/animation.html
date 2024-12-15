@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatPage</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">  
+    <link rel="icon" type="image/png" href="{{url_for('static', filename='media/logo.png')}}"> 
+    <script>
+        // Imposta il redirect dopo un certo tempo
+        const redirectUrl = "{{ url_for('chat') }}";
+        const redirectDelay = 7500; // Tempo in millisecondi (es. 5 secondi)
+
+        window.onload = () => {
+            setTimeout(() => {
+                window.location.href = redirectUrl;
+            }, redirectDelay);
+        };
+    </script>
+</head>
+<body>
+    <div class="animation-container">
+        <div class="logo-box">
+            <img src="{{url_for('static', filename='media/logo.png')}}" alt="DemocrAI Logo" class="logo">
+            <div class="text">
+                <h1 class="main-title">REVOLUTIONIZING</h1>
+                <h1 class="main-title">CITIZIEN-POLITICS</h1>
+                <h1 class="main-title">INTERACTIONS</h1>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

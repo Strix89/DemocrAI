@@ -44,7 +44,7 @@ class User(db.Model):
 @app.route("/")
 def index():
     if "username" in session:
-        return redirect(url_for("chatpage"))
+        return redirect(url_for("chat"))
     return render_template("index.html")
 
 @app.route("/login", methods=["POST"])
@@ -57,12 +57,24 @@ def login():
         return render_template("errors/401.html", message = "Accesso negato | Chi sei?", redirect_url = url_for("index"))
 
     session["username"] = username
-    return redirect(url_for("chatpage"))
+    return redirect(url_for("animation"))
 
 @app.route("/logout")
 def logout():
     session.pop("username", None)
     return redirect(url_for("index"))
+
+@app.route("/animation")
+def animation():
+    if "username" not in session:
+        return redirect(url_for("index"))
+    return render_template("animation.html")
+
+@app.route("/chat")
+def chat():
+    if "username" not in session:
+        return redirect(url_for("index"))
+    return "grevbe"
 
 if __name__ == "__main__":
     app.run(debug=True)

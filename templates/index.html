@@ -4,23 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">  
-    <link rel="icon" type="image/png" href="{{url_for('static', filname='media/logo.png')}}"> 
-    <title>Login</title>
+    <link rel="icon" type="image/png" href="{{url_for('static', filename='media/logo.png')}}"> 
+    <title>DemocrAI</title>
 </head>
 <body>
-    <div class="login-container">
-        <h2>Login</h2>
-        <form action="{{url_for('login')}}" method="post">
-            <div class="form-group">
-                <label for="Username">Username</label>
-                <input type="text" id="username" placeholder="Inserisci il tuo Username"  name="username" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" placeholder="Inserisci la tua password" name="password" required>
-            </div>
-            <button type="submit" class="login-btn">Accedi</button>
-        </form>
+    <div class="home">
+        <div class="login-container">
+            <h2>DemocrAI Login</h2>
+            <form action="{{url_for('login')}}" method="post">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" placeholder="Inserisci il tuo Username"  name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Inserisci la tua password" name="password" required>
+                </div>
+                <button type="submit" class="login-btn">ACCEDI</button>
+            </form>
+        </div>
     </div>
 </body>
 </html>

@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Error 401 - Unauthorized</title>
+    <title>Errore 401 - Unauthorized</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/png" href="{{url_for('static', filename='media/logo.png')}}"> 
     <script>
         // Imposta il redirect dopo un certo tempo
         const redirectUrl = "{{ redirect_url }}";
@@ -18,11 +19,12 @@
     </script>
 </head>
 <body>
-    <div class="error-container">
-        <h1>401</h1>
-        <h2>Unauthorized</h2>
-        <p>Errore: <span>{{ message }}</span></p>
-        <p>Ti riporto agli <a href="{{ redirect_url }}">inizi</a> a breve</p>
+    <div class="home">
+        <div class="error-container">
+            <h1>401</h1>
+            <h2>Unauthorized</h2>
+            <p>Errore: <span>{{ message }}</span></p>
+        </div>  
     </div>
 </body>
 </html>

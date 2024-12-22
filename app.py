@@ -74,7 +74,7 @@ def animation():
 def chat():
     if "username" not in session:
         return redirect(url_for("index"))
-    return "grevbe"
+    return render_template("chat.html")
 
 if __name__ == "__main__":
     app.run(debug=True)

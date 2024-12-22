@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chat-style.css') }}">  
+    <link rel="icon" type="image/png" href="{{url_for('static', filename='media/logo.png')}}"> 
+    <title>Chat</title>
+</head>
+<body>
+    <nav class="navbar">
+        <h3 class="navbar__logo">DemocrAI Prototype</h3>
+        <button class="navbar__button" id="themeToggle">
+            <i class="bx bx-sun"></i>
+        </button>
+    </nav>
+    <header class="header">
+        <div class="header__title">
+            <h1>Ciao Cittadino!</h1>
+            <h2>Come posso aiutarti oggi?</h2>
+        </div>
+        <div class="suggests">
+            <div class="suggests__item">
+                <p class="suggests__item-text">
+                    Come possono i cittadini partecipare alla vita politica?
+                </p>
+            </div>
+            <div class="suggests__item">
+                <p class="suggests__item-text">
+                    Come si vota?
+                </p>
+            </div>
+            <div class="suggests__item">
+                <p class="suggests__item-text">
+                    Come posso candidarmi?
+                </p>
+            </div>
+        </div>
+    </header>
+    <section class="chats"></section>
+    <section class="prompt">
+        <form action="#" class="prompt__form">
+            <div class="prompt__input-wrapper">
+                <input type="text" class="prompt__form-input" placeholder="Chiedimi qualcosa..." required>
+                <button class="prompt__form-button" id="sendButton">
+                    <i class="bx bx-send"></i>
+                </button>
+                <button class="prompt__form-button" id="deleteButton">
+                    <i class="bx bx-trash"></i>
+                </button>
+            </div>
+        </form>
+        <p class="prompt__disclaim">
+            DemocrAI è ancora in alpha, potrebbe fornire informazioni non corrette. 
+            Per favore, verifica sempre le informazioni fornite.
+        </p>
+    </section>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

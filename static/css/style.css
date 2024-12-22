@@ -173,7 +173,7 @@ body {
 .logo {
     width: 35vw;
     height: auto;
-    transform: translateX(10vw);
+    transform: translateX(12vw);
     animation: fadeIn 3s ease, moveLeft 3s 2s ease forwards;
 }
 
@@ -190,7 +190,7 @@ body {
 
 @keyframes moveLeft {
     0% {
-        transform: translateX(10vw);
+        transform: translateX(12vw);
     }
     100% {
         transform: translateX(3vw);

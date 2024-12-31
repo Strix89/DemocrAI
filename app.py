@@ -9,12 +9,12 @@ from flask_pymongo import PyMongo
 from Lib.ModelManager import ModelManager
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask import Flask, request, session, jsonify, redirect, render_template, url_for # Import Flask to allow us to create a web server       
+from flask import Flask, request, session, jsonify, redirect, render_template, url_for # Import Flask to allow us to create a web server 
 
+app = Flask(__name__) # Create a new web server
 load_dotenv() # Load the .env file
 ADMIN_PASSWORD_HASH = os.environ.get("ADMIN_PASSWORD_HASH")
 logging.basicConfig(level=logging.INFO)
-app = Flask(__name__) # Create a new web server
 app.secret_key = secrets.token_urlsafe(16) # Generate a random secret key for the session  
 
 try:

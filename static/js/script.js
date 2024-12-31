@@ -132,7 +132,7 @@ const handleOutgoingMessage = async () => {
     messageForm.reset();
     document.body.classList.add("hide-header");
 
-    setTimeout(displayLoadingAnimation, 500);
+    setTimeout(displayLoadingAnimation, 5);
 
     try {
         let chatId = localStorage.getItem(chatIdKey);
@@ -144,11 +144,20 @@ const handleOutgoingMessage = async () => {
         const incomingMessageHtml = `
             <div class="message__content">
                 <img class="message__avatar" src="${window.STATIC_URL_LOGO}" alt="Bot Avatar">
-                <p class="message__text">${botResponse}</p>
+                <p class="message__text"></p>
             </div>
+            <span onClick="copyMessageToClipboard(this)" class="message__icon hide"><i class="bx bx-copy-alt"></i></span>
         `;
         const incomingMessageElement = createChatMessageElement(incomingMessageHtml, "message--incoming");
         chatHistoryContainer.appendChild(incomingMessageElement);
+        const messageElement = incomingMessageElement.querySelector(".message__text");
+        showTypingEffect(
+            botResponse,      // rawText
+            marked.parse(botResponse),      // htmlText
+            messageElement,
+            incomingMessageElement,
+            false             // skipEffect
+        );
     } catch (error) {
         console.error("Error handling outgoing message:", error);
     } finally {
@@ -211,7 +220,7 @@ const sendMessageToChat = async (chatId, message) => {
         console.error("Error sending message:", error);
         displayErrorMessage(error);
         throw error;
-    }
+    } 
 };
 
 // Toggle between light and dark themes
@@ -253,44 +262,107 @@ const loadChatHistory = async () => {
     // Gestione del tema
     const isLightTheme = localStorage.getItem("themeColor") === "light_mode";
     document.body.classList.toggle("light_mode", isLightTheme);
-    themeToggleButton.innerHTML = isLightTheme ? '<i class="bx bx-moon"></i>' : '<i class="bx bx-sun"></i>';
+    themeToggleButton.innerHTML = isLightTheme
+        ? '<i class="bx bx-moon"></i>'
+        : '<i class="bx bx-sun"></i>';
+
     const chatId = localStorage.getItem(chatIdKey);
     if (!chatId) return;
+
     try {
         const response = await fetch(`${API_BASE_URL}/chats/${chatId}`);
-        if (!response.ok) throw new Error("Failed to load chat history.");
+        if (!response.ok) {
+            throw new Error("Failed to load chat history.");
+        }
 
         const chatData = await response.json();
-        chatHistoryContainer.innerHTML = ""; // Clear existing messages
+        // Svuotiamo la chat prima di ricaricare i messaggi
+        chatHistoryContainer.innerHTML = "";
 
         chatData.messages.forEach((msg) => {
-            const messageHtml = `
-                <div class="message__content">
-                    <img class="message__avatar" src="${msg.sender === 'user' ? window.STATIC_URL_AVATAR : window.STATIC_URL_LOGO}" alt="${msg.sender === 'user' ? 'User Avatar' : 'Bot Avatar'}">
-                    <p class="message__text">${msg.text}</p>
-                </div>
-            `;
-            const cssClass = msg.sender === "user" ? "message--outgoing" : "message--incoming";
-            const messageElement = createChatMessageElement(messageHtml, cssClass);
-            chatHistoryContainer.appendChild(messageElement);
+            // --- Messaggio inviato dall'utente ---
+            if (msg.sender === "user") {
+                const userMessageHtml = `
+                    <div class="message__content">
+                        <img class="message__avatar"
+                             src="${window.STATIC_URL_AVATAR}"
+                             alt="User Avatar" />
+                        <!-- Mettiamo il testo così com'è (niente Markdown) -->
+                        <p class="message__text">${msg.text}</p>
+                    </div>
+                `;
+                const userMessageElement = createChatMessageElement(userMessageHtml, "message--outgoing");
+                chatHistoryContainer.appendChild(userMessageElement);
+            }
+            // --- Messaggio di errore inviato dal "system" ---
+            else if (msg.sender === "system") {
+                // Niente pulsante di copia, solo il testo in rosso
+                const errorMessageHtml = `
+                    <div class="message__content">
+                        <img class="message__avatar"
+                             src="${window.STATIC_URL_LOGO}"
+                             alt="Assistant Avatar" />
+                        <p class="message__text">${msg.text}</p>
+                    </div>
+                `;
+                const errorMessageElement = createChatMessageElement(errorMessageHtml, "message--incoming");
+                // Applichiamo la classe .message--error per lo stile (ad es. sfondo rosso)
+                errorMessageElement.classList.add("message--error");
+                chatHistoryContainer.appendChild(errorMessageElement);
+            }
+            // --- Messaggio inviato dal bot (o da un sender diverso) ---
+            else {
+                const botMessageHtml = `
+                    <div class="message__content">
+                        <img class="message__avatar"
+                             src="${window.STATIC_URL_LOGO}"
+                             alt="Bot Avatar" />
+                        <p class="message__text"></p>
+                    </div>
+                    <!-- Pulsante di copia dell'intero messaggio -->
+                    <span class="message__icon hide" onclick="copyMessageToClipboard(this)">
+                        <i class="bx bx-copy-alt"></i>
+                    </span>
+                `;
+                const botMessageElement = createChatMessageElement(botMessageHtml, "message--incoming");
+                chatHistoryContainer.appendChild(botMessageElement);
+
+                // Prendiamo il <p class="message__text">
+                const botTextElement = botMessageElement.querySelector(".message__text");
+                // Usiamo marked per supportare il Markdown
+                botTextElement.innerHTML = marked.parse(msg.text || "");
+
+                // Evidenziamo eventuale codice
+                hljs.highlightAll();
+
+                // Aggiungiamo i bottoni "Copy" nei blocchi <pre><code>...</code></pre>
+                addCopyButtonToCodeBlocks();
+
+                // Se vuoi mostrare il pulsante di copia dell'intero messaggio, togli la classe "hide"
+                const copyIcon = botMessageElement.querySelector(".message__icon");
+                if (copyIcon) {
+                    copyIcon.classList.remove("hide");
+                }
+            }
         });
     } catch (error) {
         console.error("Error loading chat history:", error);
     }
+
+    // Nascondi l’header
     document.body.classList.add("hide-header");
 };
 
 const displayErrorMessage = (errorMessage) => {
-    const errorHtml = `
-        <div class="message__content">
-            <img class="message__avatar" src="${window.STATIC_URL_LOGO}" alt="Assistant Avatar">
+    const errorHtml =`<div class="message__content">
+        <img class="message__avatar" src="${window.STATIC_URL_LOGO}" alt="Assistant Avatar">
             <p class="message__text">${errorMessage}</p>
-        </div>
-    `;
-    const errorElement = createChatMessageElement(errorHtml, "message--outgoing");
+            </div>`;
+    const errorElement = createChatMessageElement(errorHtml, "message--incoming");
     errorElement.closest(".message").classList.add("message--error");
     chatHistoryContainer.appendChild(errorElement);
 };
+
 
 // Call this function on page load
 window.addEventListener("DOMContentLoaded", loadChatHistory);

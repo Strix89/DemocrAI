@@ -28,6 +28,7 @@
 --heading-secondary-color: #ebebeb;/* Colore per titoli secondari */
 --placeholder-color: #9ca4a8;      /* Placeholder più chiaro ma leggibile */
 --loading-color: #b9ad00;          /* Colore di sfondo per i messaggi di caricamento */
+--secondary-loading-color: #eeeeee5e; /* Colore di sfondo per i messaggi di caricamento */
 }
 
 /* =====================================
@@ -50,6 +51,7 @@
 --heading-secondary-color: #333333;/* Titoli più scuri */
 --placeholder-color: #999999;      /* Placeholder grigio */
 --loading-color: #003047;          /* Colore di sfondo per i messaggi di caricamento */
+--secondary-loading-color: #2058d160; /* Colore di sfondo per i messaggi di caricamento */
 }
 
 body{
@@ -342,7 +344,7 @@ body.hide-header .header{
     width: 100%;
     border-radius: 0.135rem;
     background-position: -800px 0;
-    background: linear-gradient(to right, #2058d160 30%, var(--loading-color) 60%, #2563eb60);
+    background: linear-gradient(to right, var(--secondary-loading-color) 30%, var(--loading-color) 60%, var(--secondary-loading-color));
     animation: loading 3s linear infinite;
 }
 

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Errore{% endblock %}
+{% block content %}
+<div class="alert alert-danger" role="alert">
+    <h4 class="alert-heading">Errore</h4>
+    <p>{{ message }}</p>
+    <hr>
+    <a href="{{ redirect_url }}" class="btn btn-secondary">Indietro</a>
+</div>
+{% endblock %}

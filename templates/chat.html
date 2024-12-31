@@ -8,11 +8,15 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chat-style.css') }}">  
     <link rel="icon" type="image/png" href="{{url_for('static', filename='media/logo.png')}}"> 
     <title>Chat</title>
+    <script>
+        window.STATIC_URL_LOGO = "{{url_for('static', filename='media/logo.png')}}";
+        window.STATIC_URL_AVATAR = "{{url_for('static', filename='media/user-avatar.png')}}";
+    </script>
 </head>
 <body>
     <nav class="navbar">
         <h3 class="navbar__logo">DemocrAI Prototype</h3>
-        <button class="navbar__button" id="themeToggle">
+        <button class="navbar__button" id="themeToggler">
             <i class="bx bx-sun"></i>
         </button>
     </nav>
@@ -26,16 +30,25 @@
                 <p class="suggests__item-text">
                     Come possono i cittadini partecipare alla vita politica?
                 </p>
+                <div class = "suggests__item-icon">
+                    <i class="bx bx-edit-alt"></i>
+                </div>
             </div>
             <div class="suggests__item">
                 <p class="suggests__item-text">
                     Come si vota?
                 </p>
+                <div class = "suggests__item-icon">
+                    <i class="bx bx-edit-alt"></i>
+                </div>
             </div>
             <div class="suggests__item">
                 <p class="suggests__item-text">
                     Come posso candidarmi?
                 </p>
+                <div class = "suggests__item-icon">
+                    <i class="bx bx-edit-alt"></i>
+                </div>
             </div>
         </div>
     </header>
@@ -47,14 +60,14 @@
                 <button class="prompt__form-button" id="sendButton">
                     <i class="bx bx-send"></i>
                 </button>
-                <button class="prompt__form-button" id="deleteButton">
+                <button type="button" class="prompt__form-button" id="deleteButton">
                     <i class="bx bx-trash"></i>
                 </button>
             </div>
         </form>
         <p class="prompt__disclaim">
             DemocrAI è ancora in alpha, potrebbe fornire informazioni non corrette. 
-            Per favore, verifica sempre le informazioni fornite.
+            Per favore, verifica sempre le informazioni.
         </p>
     </section>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>

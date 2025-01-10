@@ -1,0 +1,20 @@
+Decomponi il 'Content' in proposizioni chiare e semplici, assicurandoti che siano interpretabili fuori contesto.
+
+1.Dividi le frasi complesse in frasi semplici. Mantieni la formulazione originale del testo di input quanto possibile.
+
+2.Per ogni entità nominata accompagnata da informazioni descrittive aggiuntive, separa queste informazioni in una proposizione distinta.
+
+3.Decontestualizza la proposizione aggiungendo i modificatori necessari ai nomi o alle frasi intere e sostituendo i pronomi (ad esempio, "esso", "egli", "lei", "loro", "questo", "quello") con il nome completo delle entità a cui si riferiscono.
+
+4.Presenta i risultati come una lista di stringhe, formattate in JSON.
+
+5.Ignora qualsiasi numero o abbreviazione inserita senza un senso logico. Sostituisci le parole come "art." e simili con "articolo" o con la parola che immagini ci sia.
+
+Esempio:
+
+Input: Titolo: Eostre. Sezione: Teorie e interpretazioni, Connessione con i conigli di Pasqua. Contenuto:
+Le prime prove dell'Ussero (Osterhase) risalgono al 1678 in Germania meridionale-occidentale, registrate dal professore di medicina Georg Franck von Franckenau, ma rimasero sconosciute in altre parti della Germania fino al XVIII secolo. Lo scrittore Richard Sermon sostiene che "i conigli si vedevano spesso nei giardini a primavera, e quindi possono essere serviti come una spiegazione comoda per l'origine degli uova colorate nascoste nei giardini per i bambini. Oppure, esiste una tradizione europea secondo la quale i conigli deponevano uova, poiché lo sconquasso di un coniglio e un nido di lapwing sono molto simili, e entrambi si vedono per la prima volta a primavera. Nel XIX secolo, l'influenza delle carte, dei giocattoli e dei libri di Pasqua rese l'Ussero/Coniglio di Pasqua popolare in tutta l'Europa. Gli immigranti tedeschi esportarono quindi la tradizione in Gran Bretagna e in America, dove si evolse nell'Ussero di Pasqua."
+Output: [ "Le prime prove dell'Ussero furono registrate in Germania meridionale-occidentale nel 1678 da Georg Franck von Franckenau.", "Georg Franck von Franckenau era un professore di medicina.", "Le prove dell'Ussero rimasero sconosciute in altre parti della Germania fino al XVIII secolo.", "Richard Sermon era uno scrittore.", "Richard Sermon propone un'ipotesi sul possibile collegamento tra conigli e la tradizione della Pasqua.", "I conigli si vedevano spesso nei giardini a primavera.", "I conigli possono essere stati una spiegazione comoda per l'origine delle uova colorate nascoste nei giardini per i bambini.", "Esiste una tradizione europea secondo la quale i conigli deponevano uova.", "Lo sconquasso di un coniglio e un nido di lapwing sono molto simili.", "Entrambi, conigli e nidi di lapwing, si vedono per la prima volta a primavera.", "Nel XIX secolo, l'influenza delle carte, dei giocattoli e dei libri di Pasqua rese l'Ussero/Coniglio di Pasqua popolare in tutta l'Europa.", "Gli immigranti tedeschi esportarono la tradizione dell'Ussero/Coniglio di Pasqua in Gran Bretagna e in America.", "La tradizione dell'Ussero/Coniglio di Pasqua si evolse nell'Ussero di Pasqua in Gran Bretagna e in America."]"
+
+Decomponi il testo seguente:
+{input}

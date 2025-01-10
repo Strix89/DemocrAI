@@ -1,20 +1,43 @@
-from langchain_ollama import OllamaLLM
-import os
 import logging
+from langchain_ollama import OllamaLLM
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
 
+def _read_prompt_from_file(prompt_file: str) -> str:
+    """
+    Legge un prompt da un file e lo restituisce come stringa.
+
+    :param prompt_file: Il percorso del file da cui leggere il prompt.
+    :return: Il prompt letto dal file.
+    """
+    try:
+        text = ""
+        with open(prompt_file, "rb") as f:
+            text = f.read().decode("utf-8")
+            logging.info(f"Lettura del prompt dal file '{prompt_file}' eseguita con successo.")
+            logging.info(f"Prompt letto: \n{text}\n")
+            return text
+    except Exception as e:
+        logging.error(f"Errore durante la lettura del prompt dal file '{prompt_file}': {e}")
+        return ""
 
 class ModelManager:
-    def __init__(self, model_name: str = None, initial_prompt: str = None):
+    def __init__(self, model_name: str = None, path_prompt: str = None):
         """
         Inizializza il gestore del modello Ollama con la possibilità di configurare un prompt iniziale.
 
         :param model_name: Il nome del modello da utilizzare. Se None, verrà preso dal file .env.
         :param initial_prompt: Un prompt iniziale da usare come contesto per il modello.
+        :param path_prompt: Il percorso del file da cui leggere il prompt iniziale.
         """
         self.model_name = model_name
         self.model = None
-        self.context = initial_prompt or "Sei un assistente virtuale molto competente. Devi rispondere in italiano"
+        self.context = ""
+        self.initial_prompt = _read_prompt_from_file(path_prompt)
         self._initialize_model()
+        self.prompt_template = """Regole: {prompt}\n---\nContesto fornito: {context}\n---\nDomanda: {query}"""
+        self.prompt_template = ChatPromptTemplate.from_template(self.prompt_template)
 
     def _initialize_model(self):
         """Inizializza il modello Ollama."""
@@ -35,7 +58,6 @@ class ModelManager:
         :param new_context: Nuovo contesto o prompt da fornire al modello.
         """
         self.context = new_context
-        logging.info(f"Contesto aggiornato: {self.context}")
 
     def invoke_model(self, input_text: str) -> str:
         """
@@ -47,26 +69,21 @@ class ModelManager:
         if not self.model:
             raise RuntimeError("Il modello non è stato inizializzato correttamente.")
         
-        input_with_context = f"{self.context}\n{input_text}"
+        prompt = self.prompt_template.format(
+            prompt=self.initial_prompt,
+            context=self.context,
+            query=input_text
+        )
+
+        logging.info(f"Prompt inviato al modello: \n{prompt}\n")
 
         try:
-            result = self.model.invoke(input=input_with_context)
+            result = self.model.invoke(input=prompt)
             logging.info("Richiesta al modello eseguita con successo.")
             return result
         except Exception as e:
             logging.error(f"Errore durante l'invocazione del modello: {e}")
             raise
-
-    def continuous_interaction(self):
-        """Gestisce un'interazione continua con l'utente."""
-        print("Avvio della sessione di interazione continua. Digita 'exit' per terminare.")
-        while True:
-            user_input = input("Tu: ")
-            if user_input.lower() == "exit":
-                print("Sessione terminata.")
-                break
-            response = self.invoke_model(user_input)
-            print(f"{self.model_name.capitalize()}: {response}")
     
     def add_context(self, new_context: str):
         """
@@ -75,8 +92,11 @@ class ModelManager:
         :param new_context: Contesto da aggiungere.
         """
         self.context += f"\n{new_context}"
-        logging.info(f"Contesto aggiornato: {self.context}")
 
     def get_context(self) -> str:
         """Restituisce il contesto attuale."""
         return self.context
+    
+    def get_initial_prompt(self) -> str:
+        """Restituisce il prompt iniziale."""
+        return self.initial_prompt

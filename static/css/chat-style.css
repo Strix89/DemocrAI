@@ -12,46 +12,48 @@
    DARK MODE (default) 
    ===================================== */
 :root {
-/* --- Colori principali --- */
---primary-color: #002335;           /* Colore principale (sfondo principale) */
---secondary-color: #011c26;        /* Colore secondario (leggermente più scuro) */
---secondary-hover-color: #03293a;  /* Hover sul secondario */
+    /* --- Colori principali --- */
+    --primary-color: #002335;           /* Colore principale (sfondo principale) */
+    --secondary-color: #011c26;        /* Colore secondario (leggermente più scuro) */
+    --secondary-hover-color: #03293a;  /* Hover sul secondario */
 
-/* --- Stati di focus / hover --- */
---focus-color: #013340;            /* Leggermente più chiaro per evidenziare il focus */
---focus-hover-color: #024052;      /* Hover del focus */
---button-hover-color: #021e2c;     /* Hover sui pulsanti */
+    /* --- Stati di focus / hover --- */
+    --focus-color: #013340;            /* Leggermente più chiaro per evidenziare il focus */
+    --focus-hover-color: #024052;      /* Hover del focus */
+    --button-hover-color: #021e2c;     /* Hover sui pulsanti */
 
-/* --- Colori di testo --- */
---text-color: #ffffff;             /* Testo principale (bianco su sfondo scuro) */
---text-secondary-color: #d8d8d8;   /* Testo secondario */
---heading-secondary-color: #ebebeb;/* Colore per titoli secondari */
---placeholder-color: #9ca4a8;      /* Placeholder più chiaro ma leggibile */
---loading-color: #b9ad00;          /* Colore di sfondo per i messaggi di caricamento */
---secondary-loading-color: #eeeeee5e; /* Colore di sfondo per i messaggi di caricamento */
+    /* --- Colori di testo --- */
+    --text-color: #ffffff;             /* Testo principale (bianco su sfondo scuro) */
+    --text-secondary-color: #d8d8d8;   /* Testo secondario */
+    --heading-secondary-color: #ebebeb;/* Colore per titoli secondari */
+    --placeholder-color: #9ca4a8;      /* Placeholder più chiaro ma leggibile */
+    --loading-color: #b9ad00;          /* Colore di sfondo per i messaggi di caricamento */
+    --secondary-loading-color: #eeeeee5e; /* Colore di sfondo per i messaggi di caricamento */
+    --avatar-background: #259ab8;      /* Colore di sfondo per l'avatar */
 }
 
 /* =====================================
     LIGHT MODE (alternativa) 
     ===================================== */
 .light_mode {
-/* --- Colori principali --- */
---primary-color: #ffffff;          /* Sfondo principale chiaro */
---secondary-color: #f2f4f5;        /* Una tinta appena più scura del bianco */
---secondary-hover-color: #e6e9ea;  /* Hover sul secondario */
+    /* --- Colori principali --- */
+    --primary-color: #ffffff;          /* Sfondo principale chiaro */
+    --secondary-color: #f2f4f5;        /* Una tinta appena più scura del bianco */
+    --secondary-hover-color: #e6e9ea;  /* Hover sul secondario */
 
-/* --- Stati di focus / hover --- */
---focus-color: #dce0e2;
---focus-hover-color: #cdd2d4;
---button-hover-color: #eaf0f2;     /* Hover sui pulsanti (chiaro) */
+    /* --- Stati di focus / hover --- */
+    --focus-color: #dce0e2;
+    --focus-hover-color: #cdd2d4;
+    --button-hover-color: #eaf0f2;     /* Hover sui pulsanti (chiaro) */
 
-/* --- Colori di testo --- */
---text-color: #002335;             /* In light mode, il testo è il tuo colore brand */
---text-secondary-color: #555555;   /* Testo secondario più scuro per contrasto */
---heading-secondary-color: #333333;/* Titoli più scuri */
---placeholder-color: #999999;      /* Placeholder grigio */
---loading-color: #003047;          /* Colore di sfondo per i messaggi di caricamento */
---secondary-loading-color: #2058d160; /* Colore di sfondo per i messaggi di caricamento */
+    /* --- Colori di testo --- */
+    --text-color: #002335;             /* In light mode, il testo è il tuo colore brand */
+    --text-secondary-color: #555555;   /* Testo secondario più scuro per contrasto */
+    --heading-secondary-color: #333333;/* Titoli più scuri */
+    --placeholder-color: #999999;      /* Placeholder grigio */
+    --loading-color: #003047;          /* Colore di sfondo per i messaggi di caricamento */
+    --secondary-loading-color: #2058d160; /* Colore di sfondo per i messaggi di caricamento */
+    --avatar-background: #259ab8;
 }
 
 body{
@@ -294,6 +296,7 @@ body.hide-header .header{
     object-fit: cover;
     border-radius: 50%;
     object-fit: top center;
+    background-color: var(--avatar-background);
 }
 
 .chats .message--loading .message__avatar{

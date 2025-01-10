@@ -6,10 +6,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chat-style.css') }}">  
-    <link rel="icon" type="image/png" href="{{url_for('static', filename='media/logo.png')}}"> 
+    <link rel="icon" type="image/png" href="{{url_for('static', filename='media/libra.png')}}"> 
     <title>Chat</title>
     <script>
-        window.STATIC_URL_LOGO = "{{url_for('static', filename='media/logo.png')}}";
+        window.STATIC_URL_LOGO = "{{url_for('static', filename='media/libra.png')}}";
         window.STATIC_URL_AVATAR = "{{url_for('static', filename='media/user-avatar.png')}}";
     </script>
 </head>
@@ -36,6 +36,14 @@
             </div>
             <div class="suggests__item">
                 <p class="suggests__item-text">
+                    Come significa partecipazione libera e attiva?
+                </p>
+                <div class = "suggests__item-icon">
+                    <i class="bx bx-edit-alt"></i>
+                </div>
+            </div>
+            <div class="suggests__item">
+                <p class="suggests__item-text">
                     Come si vota?
                 </p>
                 <div class = "suggests__item-icon">
@@ -44,7 +52,7 @@
             </div>
             <div class="suggests__item">
                 <p class="suggests__item-text">
-                    Come posso candidarmi?
+                    Come funziona il sistema Giudiziario?
                 </p>
                 <div class = "suggests__item-icon">
                     <i class="bx bx-edit-alt"></i>

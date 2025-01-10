@@ -3,6 +3,7 @@ import os
 import sys
 import secrets
 import Lib.MongoLayer as mongoL
+from Lib.OllamaTools import OllamaEmbedder, OllamaDBRetriever, _compute_sentiment, _get_env_bool
 from functools import wraps
 from dotenv import load_dotenv
 from flask_pymongo import PyMongo
@@ -11,16 +12,46 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask import Flask, request, session, jsonify, redirect, render_template, url_for # Import Flask to allow us to create a web server 
 
-app = Flask(__name__) # Create a new web server
 load_dotenv() # Load the .env file
-ADMIN_PASSWORD_HASH = os.environ.get("ADMIN_PASSWORD_HASH")
 logging.basicConfig(level=logging.INFO)
+
+app = Flask(__name__) # Create a new web server
 app.secret_key = secrets.token_urlsafe(16) # Generate a random secret key for the session  
 
-try:
-    model_manager = ModelManager(os.environ.get("MODEL"))
+if _get_env_bool(os.environ.get("BUILD_DB")):
+    try:
+        logging.info("Costruzione del database dei documenti con Chroma...")
+        logging.info("Attenzione! Questa operazione potrebbe richiedere molto tempo.")
+        logging.info("Attenzione! Il database verrà sovrascritto. Non interrompere il processo.")
+        embedder = OllamaEmbedder(
+            docs_folder=os.environ.get("DOCUMENTS_PATH"),
+            model_name=os.environ.get("EMBEDDING_MODEL"),
+            chunk_size=os.environ.get("CHUNK_SIZE"),
+            chunk_overlap=os.environ.get("CHUNK_OVERLAP"),
+            persist_directory=os.environ.get("CHROMA_DB_PATH"),
+            pipeline_spacy=os.environ.get("PIPELINE_SPACY")
+        )
+        chroma_db = embedder.process_folder_and_store(preprocess=_get_env_bool(os.environ.get("PREPROCESS_TEXT")))
+        logging.info("VectorsStoreDB costruito con successo.") 
+    except Exception as e:
+        logging.error(f"Errore durante la costruzione del database: {e}")
+        sys.exit(1)
+
+try: 
+    logging.info("Inizializzazione del Retriever...")
+    retriever = OllamaDBRetriever(
+        os.environ.get("CHROMA_DB_PATH"),
+        os.environ.get("EMBEDDING_MODEL"),
+        os.environ.get("PIPELINE_SPACY"))
+    logging.info("Retriever inizializzato")
 except Exception as e:
-    logging.error(f"Errore nell'inizializzazione del modello: {e}")
+    logging.error(f"Errore nell'inizializzazione del Retriever: {e}")
+    sys.exit(1)
+
+try:
+    logging.info("Inizializzazione del modello con relativo prompt iniziale...")
+    model_manager = ModelManager(os.environ.get("MODEL"), os.environ.get("LLM_PROMPT_PATH"))
+except Exception as e:
     sys.exit(1)
 
 # Configurazione del database
@@ -63,7 +94,7 @@ def admin_required(f):
 def admin_login():
     if request.method == "POST":
         password = request.form.get("password").strip()
-        if check_password_hash(ADMIN_PASSWORD_HASH, password):
+        if check_password_hash(os.environ("ADMIN_PASSWORD_HASH"), password):
             session["admin_authenticated"] = True
             return redirect(url_for("view_users"))
         else:
@@ -173,9 +204,10 @@ def create_chat():
         return jsonify({"error": "Non autorizzato"}), 401
 
     user_id = User.query.filter_by(username=session["username"]).first().id
+
+    model_manager.set_context("")
     
     chat_name = request.json.get("message")[:20] if request.json.get("message") else "Chat senza nome"
-
     try:
         chat_id = mongoL.create_new_chat(mongo, user_id, os.environ.get("MODEL"), chat_name)
         return jsonify({"system":
@@ -200,9 +232,28 @@ def send_message():
 
     if not chat_id or not message:
         return jsonify({"error": "Parametri mancanti"}), 400
+    
+    sentiment = _compute_sentiment(message)
+
+    model_manager.set_context("")
 
     try:
-        mongoL.add_message_to_chat(mongo, chat_id, user_id, message, "user")
+        mongoL.add_message_to_chat(mongo, chat_id, user_id, message, "user", sentiment)
+        result = retriever.query(
+            message,
+            _get_env_bool(os.environ.get("PREPROCESS_TEXT")), 
+            int(os.environ.get("TOP_K")),
+            float(os.environ.get("SIMILARITY"))
+        )
+        if result and len(result) != 0:
+            if result[0][0].metadata.get("original_text", None) is not None:
+                model_manager.add_context("\n\n---\n\n".join(
+                    [f'{doc[0].metadata["original_text"]} || Fonte: {doc[0].metadata["source"]}' for doc in result])
+                )
+            else:
+                model_manager.add_context("\n\n---\n\n".join(
+                    [f'{doc[0].page_content} || Fonte: {doc[0].metadata["source"]}' for doc in result])
+                )
         response = model_manager.invoke_model(message)
         mongoL.add_message_to_chat(mongo, chat_id, user_id, response, "bot")
         return jsonify({"model": {"response": response}})

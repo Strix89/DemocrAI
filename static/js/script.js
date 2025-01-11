@@ -133,7 +133,6 @@ const handleOutgoingMessage = async () => {
     document.body.classList.add("hide-header");
 
     setTimeout(displayLoadingAnimation, 5);
-
     try {
         let chatId = localStorage.getItem(chatIdKey);
         if (!chatId) {

@@ -7,4 +7,5 @@ old/
 documents/
 chroma_db/
 chroma_db_rec_pre/
-chroma_db_sec/
+chroma_db_sem/
+chroma_db_sem_pre/

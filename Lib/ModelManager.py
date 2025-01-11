@@ -1,7 +1,6 @@
 import logging
 from langchain_ollama import OllamaLLM
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 
 def _read_prompt_from_file(prompt_file: str) -> str:
@@ -37,7 +36,7 @@ class ModelManager:
         self.initial_prompt = _read_prompt_from_file(path_prompt)
         self._initialize_model()
         self.prompt_template = """Regole: {prompt}\n---\nContesto fornito: {context}\n---\nDomanda: {query}"""
-        self.prompt_template = ChatPromptTemplate.from_template(self.prompt_template)
+        
 
     def _initialize_model(self):
         """Inizializza il modello Ollama."""
@@ -68,7 +67,7 @@ class ModelManager:
         """
         if not self.model:
             raise RuntimeError("Il modello non è stato inizializzato correttamente.")
-        
+
         prompt = self.prompt_template.format(
             prompt=self.initial_prompt,
             context=self.context,
@@ -78,6 +77,7 @@ class ModelManager:
         logging.info(f"Prompt inviato al modello: \n{prompt}\n")
 
         try:
+            logging.info(f"Prompt inviato al modello")
             result = self.model.invoke(input=prompt)
             logging.info("Richiesta al modello eseguita con successo.")
             return result

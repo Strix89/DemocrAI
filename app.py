@@ -1,4 +1,5 @@
 import logging
+import warnings
 import os
 import sys
 import secrets
@@ -13,7 +14,15 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from flask import Flask, request, session, jsonify, redirect, render_template, url_for # Import Flask to allow us to create a web server 
 
 load_dotenv() # Load the .env file
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+
+warnings.filterwarnings("ignore", category=UserWarning)
 
 app = Flask(__name__) # Create a new web server
 app.secret_key = secrets.token_urlsafe(16) # Generate a random secret key for the session  
@@ -29,7 +38,8 @@ if _get_env_bool(os.environ.get("BUILD_DB")):
             chunk_size=os.environ.get("CHUNK_SIZE"),
             chunk_overlap=os.environ.get("CHUNK_OVERLAP"),
             persist_directory=os.environ.get("CHROMA_DB_PATH"),
-            pipeline_spacy=os.environ.get("PIPELINE_SPACY")
+            pipeline_spacy=os.environ.get("PIPELINE_SPACY"),
+            chunking_type=os.environ.get("CHUNKING_TYPE")
         )
         chroma_db = embedder.process_folder_and_store(preprocess=_get_env_bool(os.environ.get("PREPROCESS_TEXT")))
         logging.info("VectorsStoreDB costruito con successo.") 

@@ -5,8 +5,9 @@ import spacy
 import numpy as np
 import re
 import logging
+import warnings
+from enum import Enum
 from typing import List
-from ChunkType import ChunkType
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader, TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -17,8 +18,22 @@ from langchain_chroma import Chroma
 from langchain_community.vectorstores import Chroma as constructorChroma
 from sklearn.metrics.pairwise import cosine_similarity
 
+class ChunkType(Enum):
+    RECURSIVE = "recursive"
+    SEMANTIC = "semantic"
+    # AGENTIC = "agentic" # TODO
+
+    @classmethod
+    def from_string(cls, value: str):
+        try:
+            return next(member for member in cls if member.value.lower() == value.lower())
+        except StopIteration:
+            return cls.RECURSIVE
+
+
 def _get_env_bool(value: str):
     return str(value).lower() == "true"
+
 
 def _compute_sentiment(text: str) -> dict:
     """
@@ -28,12 +43,13 @@ def _compute_sentiment(text: str) -> dict:
     sentiment = sentiment_analyzer.polarity_scores(text)
     return sentiment
 
+
 class OllamaEmbedder:
     """
     Classe che:
-      1) Carica PDF da una cartella (DirectoryLoader + PyPDFLoader)
-      2) Suddivide i PDF in chunk con RecursiveCharacterTextSplitter
-      3) Calcola embedding con Ollama (modello 'snowflake-arctic-embed2')
+      1) Carica PDF e file di testo da una cartella (DirectoryLoader + PyPDFLoader/TextLoader)
+      2) Suddivide i documenti in chunk con RecursiveCharacterTextSplitter o SemanticChunker
+      3) Calcola embedding con Ollama (modello specificato)
       4) Salva tutto in un database Chroma (opzionalmente ricreandolo da zero)
     """
 
@@ -44,7 +60,7 @@ class OllamaEmbedder:
         chunk_size: int = 512,
         chunk_overlap: int = 50,
         persist_directory: str = "chroma_db",
-        pipeline_spacy = "it_core_news_lg",
+        pipeline_spacy: str = "it_core_news_lg",
         chunking_type: str = "semantic"
     ):
         """
@@ -53,7 +69,6 @@ class OllamaEmbedder:
         :param chunk_size:    Numero massimo di caratteri per chunk.
         :param chunk_overlap: Overlap (in caratteri) fra chunk consecutivi.
         :param persist_directory: Directory in cui salvare il DB di Chroma.
-        :param glob_pattern:  Pattern di ricerca dei file PDF, default "**/*.pdf, "**/*.txt".
         :param pipeline_spacy: Nome del modello di Spacy da utilizzare. Default: 'it_core_news_lg'.
         :param chunking_type: Tipo di suddivisione del testo. Default: 'semantic'.
         """
@@ -71,6 +86,7 @@ class OllamaEmbedder:
             loader_cls=PyPDFLoader
         )
 
+        # Istanzia il loader per i file di testo
         self.textloader = DirectoryLoader(
             self.docs_folder,
             glob="**/*.txt",
@@ -78,14 +94,17 @@ class OllamaEmbedder:
             loader_kwargs={'encoding': 'utf-8'}
         )
 
+        # Inizializza le embeddings di Ollama
         self.embeddings = OllamaEmbeddings(model=self.model_name)
+
+        # Carica il pipeline di Spacy
         self.nlp = spacy.load(pipeline_spacy)
 
-        # Strategia di suddivisione testo
+        # Strategia di suddivisione del testo
         if self.chunking_type == ChunkType.SEMANTIC:
             self.text_splitter = SemanticChunker(
                 self.embeddings,
-                breakpoint_threshold_type="percentile", #standard_deviatio, interquartile
+                breakpoint_threshold_type="percentile",  # Opzioni: 'standard_deviation', 'interquartile', etc.
             )
         elif self.chunking_type == ChunkType.RECURSIVE:
             self.text_splitter = RecursiveCharacterTextSplitter(
@@ -95,7 +114,8 @@ class OllamaEmbedder:
                 add_start_index=True,
                 separators=["\n\n", "\n", " ", ""]  # Delimitatori naturali (paragrafi, frasi, spazi)
             )
-        #else:
+        # else:
+            # Gestisci altri tipi di chunking se necessario
 
     def _preprocess_text(self, text: str) -> str:
         """
@@ -108,7 +128,7 @@ class OllamaEmbedder:
             if not token.is_stop and not token.is_space:
                 tokens.append(token.lemma_)
         return " ".join(tokens)
-    
+
     def normalize_whitespace(self, text: str) -> str:
         """
         - Riduce a uno solo i multipli 'a capo'
@@ -125,22 +145,24 @@ class OllamaEmbedder:
         """
         doc = self.nlp(text)
         return doc
-    
+
     def load_documents(self) -> List[Document]:
         """
-        Carica tutti i PDF dalla cartella specificata e li restituisce
-        come lista di Document (uno per PDF, ma con tutto il testo concatenato).
+        Carica tutti i PDF e i file di testo dalla cartella specificata e li restituisce
+        come lista di Document.
         """
         pdf_documents = self.pdfloader.load()
         text_documents = self.textloader.load()
+        logging.info(f"Caricati {len(pdf_documents)} PDF e {len(text_documents)} file di testo.")
         return pdf_documents + text_documents
 
     def split_documents(self, documents: List[Document]) -> List[Document]:
         """
-        Suddivide i PDF in chunk in base alla strategia definita da
+        Suddivide i documenti in chunk in base alla strategia definita da
         self.chunking_type, restituendo una lista di Document.
         """
         chunks = self.text_splitter.split_documents(documents)
+        logging.info(f"Suddivisi in {len(chunks)} chunk totali.")
         return chunks
 
     def save_to_chroma(self, chunks: List[Document]) -> Chroma:
@@ -151,46 +173,50 @@ class OllamaEmbedder:
         # Se vuoi ricreare da zero il DB, cancella prima la cartella
         if os.path.exists(self.persist_directory):
             shutil.rmtree(self.persist_directory)
+            logging.info(f"Cartella '{self.persist_directory}' eliminata per ricreare il DB da zero.")
 
         # Creiamo un nuovo DB con i documenti chunked
         db = constructorChroma.from_documents(
             chunks, embedding=self.embeddings, persist_directory=self.persist_directory
         )
+        db.persist()
+        logging.info(f"Salvati {len(chunks)} chunk su Chroma in '{self.persist_directory}'.")
         return db
 
     def process_folder_and_store(self, preprocess: bool = False) -> Chroma:
         """
         Metodo principale che:
-          1) Carica i PDF
-          2) Li divide in chunk
-          3) Crea il DB Chroma
-          4) Stampa qualche informazione di debug
+          1) Carica i documenti
+          2) Opzionalmente pre-processa i testi
+          3) Li divide in chunk
+          4) Crea il DB Chroma
+          5) Stampa informazioni di debug
         """
         documents = self.load_documents()
 
-        if preprocess: #and self.chunking_type not in [ChunkType.SEMANTIC] ChunkType.AGENTIC #TODO
+        if preprocess:
+            logging.info("Inizio del preprocessamento dei documenti.")
             for doc in documents:
-                doc.page_content = self.normalize_whitespace(doc.page_content)
                 original_text = doc.page_content
+                doc.page_content = self.normalize_whitespace(original_text)
                 doc.metadata["original_text"] = original_text
-                preprocessed = self._preprocess_text(original_text)
+                preprocessed = self._preprocess_text(doc.page_content)
                 doc.page_content = preprocessed
+            logging.info("Preprocessamento completato.")
 
         chunks = self.split_documents(documents)
 
-        logging.info(f"Caricati {len(documents)} Documents.")
-        logging.info(f"Suddivisi in {len(chunks)} chunk totali.\n")
-
         db = self.save_to_chroma(chunks)
-        logging.info(f"Salvati {len(chunks)} chunk su Chroma in '{self.persist_directory}'.\n")
         return db
 
     def _get_embeddings_of_phrase(self, phrase: str, preprocess: bool = False) -> List[float]:
         """
         Restituisce gli embedding di una frase usando OllamaEmbeddings.
         """
-        return self.embeddings.embed_query(phrase) if not preprocess else self.embeddings.embed_query(self._preprocess_text(phrase))
-
+        if preprocess:
+            phrase = self._preprocess_text(phrase)
+        return self.embeddings.embed_query(phrase)
+    
     def _compute_cosine_similarity(self, embedding1: List[float], embedding2: List[float]) -> float:
         """
         Calcola la similarità coseno tra due embedding.
@@ -203,8 +229,13 @@ class OllamaEmbedder:
         similarity = cosine_similarity(vector1, vector2)[0][0]
         return similarity
 
+
 class OllamaDBRetriever:
-    def __init__(self, persist_directory: str, model_name: str = "snowflake-arctic-embed2", pipeline_spacy = "it_core_news_lg"):
+    """
+    Classe per recuperare documenti dal database Chroma utilizzando le embeddings di Ollama.
+    """
+
+    def __init__(self, persist_directory: str, model_name: str = "snowflake-arctic-embed2", pipeline_spacy: str = "it_core_news_lg"):
         """
         Inizializza un retriever per il DB di Chroma.
         :param persist_directory: Directory in cui è salvato il DB di Chroma.
@@ -216,26 +247,55 @@ class OllamaDBRetriever:
         self.embeddings = OllamaEmbeddings(model=self.model_name)
         self.chromadb = Chroma(persist_directory=self.persist_directory, embedding_function=self.embeddings)
         self.nlp = spacy.load(pipeline_spacy)
-    
-    def query(self, query_text: str, preprocess: bool = False, k: int = 5, similarity_threshold: float = 0.2):
+
+    def _preprocess_text(self, text: str) -> str:
+        """
+        Metodo di preprocessamento per mantenere DRY.
+        Rimuove stopwords e trasforma le parole in lemma.
+        """
+        doc = self.nlp(text.lower())
+        tokens = []
+        for token in doc:
+            if not token.is_stop and not token.is_space:
+                tokens.append(token.lemma_)
+        return " ".join(tokens)
+
+    def query(self, query_text: str, preprocess: bool = False, k: int = 5, similarity_threshold: float = 0.2) -> List[Document]:
         """
         Esegue una query sul DB di Chroma e restituisce i risultati.
         :param query_text: Testo da cercare.
         :param preprocess: Se True, pre-elabora il testo con _preprocess_text.
         :param k: Numero di risultati da restituire.
         :param similarity_threshold: Soglia di similarità minima per considerare un risultato.
+        :return: Lista di Document che soddisfano la query.
         """
+        logging.info(f"Query di ricerca: {query_text}")
         if preprocess:
-            doc = self.nlp(query_text.lower())
-            tokens = []
-            for token in doc:
-                if not token.is_stop and not token.is_space:
-                    tokens.append(token.lemma_)
-            query_text = " ".join(tokens)
-        results = self.chromadb.similarity_search_with_relevance_scores(query_text, k=k)
-        if len(results) == 0 or results[0][1] <= similarity_threshold:
+            query_text = self._preprocess_text(query_text)
+            logging.info(f"Testo della query pre-processato al retriever: {query_text}")
+
+        try:
+            results = self.chromadb.similarity_search_with_relevance_scores(
+                query_text, k=k, score_threshold=similarity_threshold
+            )
+            logging.info(f"Risultati ottenuti dalla ricerca: {len(results)}")
+
+            filtered_results = []
+            for doc in results:
+                if 0 <= doc[1] <= 1:
+                    filtered_results.append(doc)
+                else:
+                    logging.warning(f"Punteggio fuori intervallo per il documento '{doc[0].metadata.get('source', 'sconosciuto')}': {doc[1]}")
+
+            if not filtered_results:
+                logging.info("Nessun documento soddisfa la soglia di similarità specificata.")
+            else:
+                logging.info(f"{len(filtered_results)} documenti validi trovati dopo il filtraggio.")
+
+            return filtered_results
+        except Exception as e:
+            logging.error(f"Errore durante la ricerca di similarità: {e}")
             return []
-        return results
 
 # Esempio di utilizzo
 if __name__ == "__main__":
@@ -261,7 +321,7 @@ if __name__ == "__main__":
     embeddingFunction = OllamaEmbeddings(model = "snowflake-arctic-embed2")
     db = Chroma(persist_directory=CHROMA_FOLDER, embedding_function=embeddingFunction)
     # Search the DB.
-    query_text = "art. 2 costituzione"
+    query_text = "mi dici i primi 10 articoli della costituzione?"
     query_text = embedder._preprocess_text(query_text)
     results = db.similarity_search_with_relevance_scores(query_text, k=4)
     if len(results) == 0 or results[0][1] < 0.1:

@@ -140,6 +140,7 @@ Questo progetto sarà/è stato presentato alle **UNIVERSIADI BRAINSTORM DI TORIN
 ## Bug da Risolvere
 - [ ] Dopo il submit della query sulla pagina: scrolldown all'incomingMessage del modello
 - [ ] Bug dell'eliminazione da MongoDB e ricaricamento pagina (deve riapparire la home normale della chat)
+- [ ] Interrompere la generazione della risposta quando l'utende cestina la chat
 
 ## Miglioramenti
 - [ ] Integrazione con altre fonti di dati certificati

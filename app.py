@@ -243,6 +243,8 @@ def create_chat():
 
     user_id = User.query.filter_by(username=session["username"]).first().id
 
+    model_manager.set_context("")
+
     chat_name = request.json.get("message")[:20] if request.json.get("message") else "Chat senza nome"
     try:
         chat_id = mongoL.create_new_chat(mongo, user_id, os.environ.get("MODEL"), chat_name)
@@ -270,6 +272,8 @@ async def send_message():
 
     sentiment = _compute_sentiment(message)
 
+    model_manager.set_context("")
+
     try:
         mongoL.add_message_to_chat(mongo, chat_id, user_id, message, "user", sentiment)
         result = await retriever.query(
@@ -280,11 +284,11 @@ async def send_message():
         )
         if result and len(result) != 0:
             if result[0][0].metadata.get("original_text", None) is not None:
-                model_manager.add_context("\n\n---\n\n".join(
+                model_manager.add_context("\n".join(
                     [f'{doc[0].metadata["original_text"]} || Fonte: {doc[0].metadata["source"]}' for doc in result])
                 )
             else:
-                model_manager.add_context("\n\n---\n\n".join(
+                model_manager.add_context("\n".join(
                     [f'{doc[0].page_content} || Fonte: {doc[0].metadata["source"]}' for doc in result])
                 )
         response = await model_manager.invoke_model(message)
@@ -331,6 +335,5 @@ def api_base():
     return jsonify({"api_base_url": url_for('index', _external=True)})
 
 
-# Avvio dell'applicazione
-if __name__ == "__main__":
-    app.run(debug=True)
+
+app.run(debug=True, host="0.0.0.0", port=5000)

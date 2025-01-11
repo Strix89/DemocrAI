@@ -10,9 +10,8 @@ let currentUserMessage = null;
 let isGeneratingResponse = false;
 
 // API endpoints
-const API_BASE_URL = "http://localhost:5000/api";
-const NEW_CHAT_ENDPOINT = `${API_BASE_URL}/new_chat`;
-const SEND_MESSAGE_ENDPOINT = `${API_BASE_URL}/send_message`;
+const NEW_CHAT_ENDPOINT = `${window.API_BASE_URL}/new_chat`;
+const SEND_MESSAGE_ENDPOINT = `${window.API_BASE_URL}/send_message`;
 
 // Initialize localStorage chat ID
 const chatIdKey = "chat_id";

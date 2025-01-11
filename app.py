@@ -11,9 +11,12 @@ from flask_pymongo import PyMongo
 from Lib.ModelManager import ModelManager
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask import Flask, request, session, jsonify, redirect, render_template, url_for # Import Flask to allow us to create a web server 
+from flask import Flask, request, session, jsonify, redirect, render_template, url_for
 
-load_dotenv() # Load the .env file
+# Caricamento delle variabili di ambiente dal file .env
+load_dotenv()
+
+# Configurazione della logica globale
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -22,16 +25,23 @@ logging.basicConfig(
     ]
 )
 
+# Ignora alcuni avvisi di categoria UserWarning
 warnings.filterwarnings("ignore", category=UserWarning)
 
-app = Flask(__name__) # Create a new web server
-app.secret_key = secrets.token_urlsafe(16) # Generate a random secret key for the session  
+# Creazione di un'applicazione Flask
+app = Flask(__name__)
 
+# Generazione di una chiave segreta per le sessioni
+app.secret_key = secrets.token_urlsafe(16)
+
+# Controllo della variabile di ambiente per costruire il database, se necessario
 if _get_env_bool(os.environ.get("BUILD_DB")):
     try:
         logging.info("Costruzione del database dei documenti con Chroma...")
         logging.info("Attenzione! Questa operazione potrebbe richiedere molto tempo.")
         logging.info("Attenzione! Il database verrà sovrascritto. Non interrompere il processo.")
+
+        # Creazione di un oggetto per calcolare embedding e salvare il database
         embedder = OllamaEmbedder(
             docs_folder=os.environ.get("DOCUMENTS_PATH"),
             model_name=os.environ.get("EMBEDDING_MODEL"),
@@ -41,40 +51,46 @@ if _get_env_bool(os.environ.get("BUILD_DB")):
             pipeline_spacy=os.environ.get("PIPELINE_SPACY"),
             chunking_type=os.environ.get("CHUNKING_TYPE")
         )
+
+        # Elaborazione dei documenti e salvataggio del database
         chroma_db = embedder.process_folder_and_store(preprocess=_get_env_bool(os.environ.get("PREPROCESS_TEXT")))
-        logging.info("VectorsStoreDB costruito con successo.") 
+        logging.info("VectorsStoreDB costruito con successo.")
     except Exception as e:
         logging.error(f"Errore durante la costruzione del database: {e}")
         sys.exit(1)
 
-try: 
+# Inizializzazione del retriever per interrogare il database costruito
+try:
     logging.info("Inizializzazione del Retriever...")
     retriever = OllamaDBRetriever(
         os.environ.get("CHROMA_DB_PATH"),
         os.environ.get("EMBEDDING_MODEL"),
-        os.environ.get("PIPELINE_SPACY"))
+        os.environ.get("PIPELINE_SPACY")
+    )
     logging.info("Retriever inizializzato")
 except Exception as e:
     logging.error(f"Errore nell'inizializzazione del Retriever: {e}")
     sys.exit(1)
 
+# Inizializzazione del gestore del modello per gestire richieste linguistiche
 try:
     logging.info("Inizializzazione del modello con relativo prompt iniziale...")
     model_manager = ModelManager(os.environ.get("MODEL"), os.environ.get("LLM_PROMPT_PATH"))
 except Exception as e:
     sys.exit(1)
 
-# Configurazione del database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'  # Utilizza SQLite per semplicità
+# Configurazione del database SQLAlchemy per gestire utenti
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Inizializzazione di SQLAlchemy
 db = SQLAlchemy(app)
 
-# Configurazione di MongoDB
+# Configurazione di MongoDB per la gestione delle chat
 app.config["MONGO_URI"] = os.environ.get("MONGO_URI")
 mongo = PyMongo(app)
 
+# Definizione della classe User per rappresentare gli utenti
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -92,6 +108,7 @@ class User(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
+# Decoratore per proteggere le route amministrative
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -100,6 +117,7 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# Route per il login amministrativo
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
     if request.method == "POST":
@@ -111,11 +129,13 @@ def admin_login():
             return render_template("errors/error.html", message="Password amministratore errata", redirect_url=url_for("admin_login"))
     return render_template("admin_login.html")
 
+# Route per il logout amministrativo
 @app.route("/admin/logout")
 def admin_logout():
     session.pop("admin_authenticated", None)
     return redirect(url_for("index"))
 
+# Route per aggiungere nuovi utenti
 @app.route("/admin/add_user", methods=["GET", "POST"])
 @admin_required
 def add_user():
@@ -126,6 +146,7 @@ def add_user():
         last_name = request.form.get("last_name").strip()
         age = request.form.get("age").strip()
 
+        # Convalida dei dati inseriti
         if not all([username, password, first_name, last_name, age]):
             return render_template("errors/400.html", message="Tutti i campi sono obbligatori", redirect_url=url_for("add_user"))
 
@@ -139,6 +160,7 @@ def add_user():
         except ValueError:
             return render_template("errors/400.html", message="Età deve essere un numero positivo", redirect_url=url_for("add_user"))
 
+        # Creazione e salvataggio dell'utente
         new_user = User(
             username=username,
             first_name=first_name,
@@ -151,12 +173,14 @@ def add_user():
         return redirect(url_for("view_users"))
     return render_template("add_user.html")
 
+# Route per visualizzare gli utenti
 @app.route("/admin/users")
 @admin_required
 def view_users():
     users = User.query.all()
     return render_template("view_users.html", users=users)
 
+# Route per eliminare un utente
 @app.route("/admin/delete_user/<int:user_id>", methods=["POST"])
 @admin_required
 def delete_user(user_id):
@@ -165,13 +189,14 @@ def delete_user(user_id):
     db.session.commit()
     return redirect(url_for("view_users"))
 
-#Login
+# Route principale per il login
 @app.route("/")
 def index():
     if "username" in session:
         return redirect(url_for("chat"))
     return render_template("index.html")
 
+# Route per il login utente
 @app.route("/login", methods=["POST"])
 def login():
     username = request.form.get("username").strip()
@@ -187,6 +212,7 @@ def login():
     session["age"] = user.age
     return redirect(url_for("animation"))
 
+# Route per il logout utente
 @app.route("/logout")
 def logout():
     session.pop("username", None)
@@ -195,12 +221,14 @@ def logout():
     session.pop("age", None)
     return redirect(url_for("index"))
 
+# Route per l'animazione di benvenuto
 @app.route("/animation")
 def animation():
     if "username" not in session:
         return redirect(url_for("index"))
     return render_template("animation.html")
 
+# Route per la pagina della chat
 @app.route("/chat")
 def chat():
     if "username" not in session:
@@ -214,7 +242,7 @@ def create_chat():
         return jsonify({"error": "Non autorizzato"}), 401
 
     user_id = User.query.filter_by(username=session["username"]).first().id
-    
+
     chat_name = request.json.get("message")[:20] if request.json.get("message") else "Chat senza nome"
     try:
         chat_id = mongoL.create_new_chat(mongo, user_id, os.environ.get("MODEL"), chat_name)
@@ -226,7 +254,6 @@ def create_chat():
         mongoL.log_error_to_chat(mongo, None, user_id, error_message)
         return jsonify({"system": {"error": error_message}}), 500
 
-    
 # API per inviare un messaggio alla chat
 @app.route("/api/send_message", methods=["POST"])
 async def send_message():
@@ -240,7 +267,7 @@ async def send_message():
 
     if not chat_id or not message:
         return jsonify({"error": "Parametri mancanti"}), 400
-    
+
     sentiment = _compute_sentiment(message)
 
     try:
@@ -281,7 +308,8 @@ def get_chats():
         return jsonify(chats)
     except Exception as e:
         return jsonify({"system": {"error": str(e)}}), 500
-    
+
+# API per recuperare i messaggi di una chat
 @app.route("/api/chats/<chat_id>", methods=["GET"])
 def get_chat_messages(chat_id):
     if "username" not in session:
@@ -296,7 +324,13 @@ def get_chat_messages(chat_id):
         return jsonify(chat)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+# API per restituire l'URL base dell'API
+@app.route('/api_base')
+def api_base():
+    return jsonify({"api_base_url": url_for('index', _external=True)})
 
 
+# Avvio dell'applicazione
 if __name__ == "__main__":
     app.run(debug=True)

@@ -11,6 +11,7 @@
     <script>
         window.STATIC_URL_LOGO = "{{url_for('static', filename='media/libra.png')}}";
         window.STATIC_URL_AVATAR = "{{url_for('static', filename='media/user-avatar.png')}}";
+        window.API_BASE_URL = "{{ url_for('index', _external=True).rstrip('/') }}/api"
     </script>
 </head>
 <body>

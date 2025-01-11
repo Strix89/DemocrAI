@@ -1,7 +1,5 @@
 import logging
 from langchain_ollama import OllamaLLM
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
 
 def _read_prompt_from_file(prompt_file: str) -> str:
     """
@@ -58,11 +56,12 @@ class ModelManager:
         """
         self.context = new_context
 
-    def invoke_model(self, input_text: str) -> str:
+    async def invoke_model(self, input_text: str, context: str = None) -> str:
         """
         Invoca il modello Ollama con l'input fornito, includendo il contesto.
 
         :param input_text: Il testo da inviare al modello.
+        :param context: Contesto da fornire al modello. Se None, verrà usato il contesto dell'oggetto.
         :return: La risposta del modello.
         """
         if not self.model:
@@ -70,7 +69,7 @@ class ModelManager:
 
         prompt = self.prompt_template.format(
             prompt=self.initial_prompt,
-            context=self.context,
+            context=self.context if context is None else context,
             query=input_text
         )
 

@@ -214,8 +214,6 @@ def create_chat():
         return jsonify({"error": "Non autorizzato"}), 401
 
     user_id = User.query.filter_by(username=session["username"]).first().id
-
-    model_manager.set_context("")
     
     chat_name = request.json.get("message")[:20] if request.json.get("message") else "Chat senza nome"
     try:
@@ -231,7 +229,7 @@ def create_chat():
     
 # API per inviare un messaggio alla chat
 @app.route("/api/send_message", methods=["POST"])
-def send_message():
+async def send_message():
     if "username" not in session:
         return jsonify({"error": "Non autorizzato"}), 401
 
@@ -245,11 +243,9 @@ def send_message():
     
     sentiment = _compute_sentiment(message)
 
-    model_manager.set_context("")
-
     try:
         mongoL.add_message_to_chat(mongo, chat_id, user_id, message, "user", sentiment)
-        result = retriever.query(
+        result = await retriever.query(
             message,
             _get_env_bool(os.environ.get("PREPROCESS_TEXT")), 
             int(os.environ.get("TOP_K")),
@@ -264,7 +260,7 @@ def send_message():
                 model_manager.add_context("\n\n---\n\n".join(
                     [f'{doc[0].page_content} || Fonte: {doc[0].metadata["source"]}' for doc in result])
                 )
-        response = model_manager.invoke_model(message)
+        response = await model_manager.invoke_model(message)
         mongoL.add_message_to_chat(mongo, chat_id, user_id, response, "bot")
         return jsonify({"model": {"response": response}})
     except Exception as e:

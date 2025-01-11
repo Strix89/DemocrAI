@@ -260,7 +260,7 @@ class OllamaDBRetriever:
                 tokens.append(token.lemma_)
         return " ".join(tokens)
 
-    def query(self, query_text: str, preprocess: bool = False, k: int = 5, similarity_threshold: float = 0.2) -> List[Document]:
+    async def query(self, query_text: str, preprocess: bool = False, k: int = 5, similarity_threshold: float = 0.2) -> List[Document]:
         """
         Esegue una query sul DB di Chroma e restituisce i risultati.
         :param query_text: Testo da cercare.

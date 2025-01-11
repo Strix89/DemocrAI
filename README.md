@@ -5,7 +5,7 @@ Questo progetto sarà/è stato presentato alle **UNIVERSIADI BRAINSTORM DI TORIN
 
 # Poster
 
-![PosterUniversiadiBrainstomTorino](./media/Poster.png)
+![PosterUniversiadiBrainstomTorino](./static/media/Poster.png)
 
 
 ## Funzionalità principali

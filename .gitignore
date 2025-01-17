@@ -4,7 +4,6 @@ Lib/__pycache__/
 instance/users.db
 .env
 old/
-documents/
 chroma_db/
 chroma_db_rec_pre/
 chroma_db_sem/

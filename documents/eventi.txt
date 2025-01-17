@@ -1,0 +1,119 @@
+Evento: Incontro con i giovani
+Partito: Partito Democratico (PD)
+Data: 15 marzo 2025
+Luogo: Roma, Piazza del Popolo
+Descrizione: Un incontro organizzato dal Partito Democratico per discutere di politiche giovanili e opportunità di lavoro. Sono stati invitati esperti del settore e rappresentanti delle università.
+
+Evento: Conferenza sul futuro dell'Europa
+Partito: Forza Italia (FI)
+Data: 10 aprile 2024
+Luogo: Milano, Palazzo delle Stelline
+Descrizione: Una conferenza per discutere il ruolo dell'Italia nell'Unione Europea e le prospettive future. Partecipano europarlamentari e rappresentanti del governo.
+
+Evento: Festa della Libertà
+Partito: Lega
+Data: 25 aprile 2025
+Luogo: Verona, Piazza Bra
+Descrizione: Una festa per celebrare i valori della libertà e dell'autonomia, con discorsi del leader del partito e performance musicali.
+
+Evento: Incontro sulla transizione ecologica
+Partito: Movimento 5 Stelle (M5S)
+Data: 5 maggio 2024
+Luogo: Napoli, Piazza del Plebiscito
+Descrizione: Un dibattito pubblico sulle politiche ambientali e la transizione ecologica, con la partecipazione di esperti e attivisti.
+
+Evento: Congresso Nazionale
+Partito: Fratelli d'Italia (FdI)
+Data: 20 maggio 2025
+Luogo: Roma, Palazzo dei Congressi
+Descrizione: Il congresso nazionale del partito, con la presentazione del programma politico per le prossime elezioni e discorsi dei leader.
+
+Evento: Incontro con le imprese
+Partito: Partito Democratico (PD)
+Data: 12 giugno 2025
+Luogo: Firenze, Palazzo Vecchio
+Descrizione: Un incontro con i rappresentanti delle imprese toscane per discutere di sviluppo economico e politiche industriali.
+
+Evento: Conferenza sulla sicurezza
+Partito: Lega
+Data: 30 giugno 2025
+Luogo: Torino, Palazzo Madama
+Descrizione: Una conferenza sulla sicurezza pubblica e le politiche di immigrazione, con la partecipazione di esperti e rappresentanti delle forze dell'ordine.
+
+Evento: Festa della Democrazia
+Partito: Movimento 5 Stelle (M5S)
+Data: 15 luglio 2023
+Luogo: Palermo, Piazza Pretoria
+Descrizione: Una festa per celebrare i valori della democrazia e della partecipazione civica, con dibattiti e attività culturali.
+
+Evento: Incontro sulla scuola
+Partito: Forza Italia (FI)
+Data: 25 settembre 2023
+Luogo: Bologna, Palazzo d'Accursio
+Descrizione: Un incontro per discutere di politiche scolastiche e formative, con la partecipazione di insegnanti, dirigenti scolastici e rappresentanti del ministero.
+
+Evento: Congresso Regionale
+Partito: Fratelli d'Italia (FdI)
+Data: 10 ottobre 2024
+Luogo: Bari, Fiera del Levante
+Descrizione: Il congresso regionale del partito in Puglia, con la presentazione delle strategie per le prossime elezioni regionali.
+
+Evento: Incontro sulla sanità
+Partito: Partito Democratico (PD)
+Data: 20 novembre 2025
+Luogo: Genova, Palazzo Ducale
+Descrizione: Un dibattito pubblico sulle politiche sanitarie e il futuro del sistema sanitario nazionale, con la partecipazione di medici e rappresentanti delle istituzioni.
+
+Evento: Conferenza sull'innovazione
+Partito: Movimento 5 Stelle (M5S)
+Data: 5 dicembre 2023
+Luogo: Venezia, Palazzo Grassi
+Descrizione: Una conferenza sull'innovazione tecnologica e digitale, con la partecipazione di start-up, imprenditori e rappresentanti del governo.
+
+Evento: Festa della Famiglia
+Partito: Lega
+Data: 15 dicembre 2025
+Luogo: Brescia, Piazza della Loggia
+Descrizione: Una festa per celebrare i valori della famiglia e delle tradizioni, con attività per bambini e discorsi dei leader del partito.
+
+Evento: Incontro sull'agricoltura
+Partito: Forza Italia (FI)
+Data: 10 gennaio 2024
+Luogo: Perugia, Palazzo dei Priori
+Descrizione: Un incontro con i rappresentanti del settore agricolo per discutere di politiche agrarie e sviluppo rurale.
+
+Evento: Congresso Provinciale
+Partito: Fratelli d'Italia (FdI)
+Data: 25 febbraio 2024
+Luogo: Cagliari, Fiera di Cagliari
+Descrizione: Il congresso provinciale del partito in Sardegna, con la presentazione delle strategie per le prossime elezioni locali.
+
+Evento: Incontro sulla cultura
+Partito: Partito Democratico (PD)
+Data: 15 marzo 2025
+Luogo: Torino, Palazzo Carignano
+Descrizione: Un dibattito pubblico sulle politiche culturali e la valorizzazione del patrimonio artistico italiano, con la partecipazione di artisti e rappresentanti delle istituzioni.
+
+Evento: Conferenza sull'energia
+Partito: Movimento 5 Stelle (M5S)
+Data: 10 aprile 2025
+Luogo: Bologna, Palazzo Re Enzo
+Descrizione: Una conferenza sulle politiche energetiche e la transizione verso fonti rinnovabili, con la partecipazione di esperti e rappresentanti del settore.
+
+Evento: Festa del Lavoro
+Partito: Lega
+Data: 1 maggio 2025
+Luogo: Milano, Piazza Duomo
+Descrizione: Una festa per celebrare il lavoro e i lavoratori, con discorsi dei leader del partito e performance musicali.
+
+Evento: Incontro sulla giustizia
+Partito: Forza Italia (FI)
+Data: 15 giugno 2024
+Luogo: Roma, Palazzo di Giustizia
+Descrizione: Un incontro per discutere di riforme del sistema giudiziario e politiche per la giustizia, con la partecipazione di magistrati e rappresentanti delle istituzioni.
+
+Evento: Congresso Nazionale
+Partito: Fratelli d'Italia (FdI)
+Data: 30 settembre 2023
+Luogo: Napoli, Mostra d'Oltremare
+Descrizione: Il congresso nazionale del partito, con la presentazione del programma politico per le prossime elezioni e discorsi dei leader.
